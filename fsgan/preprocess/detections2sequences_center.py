@@ -27,6 +27,7 @@ def main(input_path, output_path=None, cache_path=None, iou_thresh=0.75, min_len
     det_list.append(np.array([], dtype='float32'))  # Makes sure the final sequences are added to the seq_list
 
     # Open input video file
+    #display
     if display:
         cap = cv2.VideoCapture(input_path)
         if not cap.isOpened():
@@ -73,7 +74,7 @@ def main(input_path, output_path=None, cache_path=None, iou_thresh=0.75, min_len
                 continue
             for j, seq in enumerate(curr_seq_list):
                 rect = seq[-1]
-                # cv2.rectangle(render_img, tuple(rect[:2]), tuple(rect[:2] + rect[2:]), (0, 0, 255), 1)
+                cv2.rectangle(render_img, tuple(rect[:2]), tuple(rect[:2] + rect[2:]), (0, 0, 255), 1)
                 cv2.rectangle(render_img, tuple(rect[:2]), tuple(rect[2:]), (0, 0, 255), 1)
                 text_pos = (rect[:2] + np.array([0, -8])).astype('float32')
                 cv2.putText(render_img, 'id: %d' % seq.id, tuple(text_pos),

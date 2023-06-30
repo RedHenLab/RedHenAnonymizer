@@ -21,7 +21,7 @@ class FaceDetector(object):
         self.out_postfix = out_postfix
         self.batch_size = batch_size
         self.verbose = verbose
-
+        print("in class FaceDetetor")
         # Set default tensor type
         # torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
@@ -48,6 +48,7 @@ class FaceDetector(object):
         # torch.set_default_tensor_type('torch.FloatTensor')
 
     def __call__(self, input_path, output_path=None):
+        print("in face_detector.py file")
         if output_path is None:
             output_filename = os.path.splitext(os.path.basename(input_path))[0] + self.out_postfix
             output_dir = os.path.split(input_path)[0]
@@ -59,7 +60,7 @@ class FaceDetector(object):
         if os.path.isfile(output_path):
             return
         print('=> Detecting faces in video: "%s..."' % os.path.basename(input_path))
-
+        print("line 62 in face_detector.py")
         # Open input video file
         cap = cv2.VideoCapture(input_path)
         if not cap.isOpened():
@@ -136,11 +137,14 @@ class FaceDetector(object):
             # Clear lists
             frame_bgr_list.clear()
             frame_tensor_list.clear()
-
+        
+        print("--------------------------------------------------------")
+        print(len(det_list))
+        print("---------------------------------------------------------")
         # Write to file
         with open(output_path, 'wb') as f:
             pickle.dump(det_list, f)
-
+        
         # Reset default tensor type
         torch.set_default_tensor_type('torch.FloatTensor')
 

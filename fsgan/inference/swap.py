@@ -8,7 +8,9 @@ the extension, residing in the same directory as the file. The information conta
 and cropped videos per sequence. In addition for each cropped video, the corresponding pose, landmarks, and
 segmentation masks will be computed and cached.
 """
-
+import torchvision
+import torchvision.transforms as T
+from PIL import Image,ImageChops
 import os
 import argparse
 import sys
@@ -133,6 +135,7 @@ class FaceSwapping(VideoProcessBase):
         self.finetune_save = finetune_save
 
         # Load reenactment model
+        print("hello before reenactement model in swap.py")
         self.Gr, checkpoint = load_model(reenactment_model, 'face reenactment', self.device, return_checkpoint=True)
         self.Gr.arch = checkpoint['arch']
         self.reenactment_state_dict = checkpoint['state_dict']
@@ -241,7 +244,10 @@ class FaceSwapping(VideoProcessBase):
         # Cache input
         source_cache_dir, source_seq_file_path, _ = self.cache(source_path)
         target_cache_dir, target_seq_file_path, _ = self.cache(target_path)
-
+        print("-------------------------------------------------------------------------")
+        print(source_cache_dir, source_seq_file_path)
+        print(target_cache_dir, source_seq_file_path)
+        print("-------------------------------------------------------------------------")
         # Load sequences from file
         with open(source_seq_file_path, "rb") as fp:  # Unpickling
             source_seq_list = pickle.load(fp)
@@ -249,6 +255,8 @@ class FaceSwapping(VideoProcessBase):
             target_seq_list = pickle.load(fp)
 
         # Select source and target sequence
+        # print("source_seq_list")
+        # print(source_seq_list.shape)
         source_seq = select_seq(source_seq_list, select_source)
         target_seq = select_seq(target_seq_list, select_target)
 
@@ -276,8 +284,12 @@ class FaceSwapping(VideoProcessBase):
                                            drop_last=False, shuffle=False)
 
         # Initialize video writer
+        print("BEFORE VIDEO_RENDERER  ")
         self.video_renderer.init(target_path, target_seq, output_path, _appearance_map=appearance_map)
-
+        print("--------------------------------------------------------------------------")
+        # print("appearance_map")
+        # print(appearance_map.shape)
+        print("--------------------------------------------------------------------------")
         # Finetune reenactment model on source sequences
         if finetune:
             self.finetune(src_vid_seq_path, self.finetune_save)
@@ -291,6 +303,10 @@ class FaceSwapping(VideoProcessBase):
             for p in range(len(src_frame)):
                 src_frame[p] = src_frame[p].to(self.device)
             tgt_frame = tgt_frame.to(self.device)
+            # if i==1:
+            #     print("-------------------------------------------")
+            #     print(tgt_landmarks.shape)
+            #     print("-------------------------------------------")
             tgt_landmarks = tgt_landmarks.to(self.device)
             # tgt_mask = tgt_mask.unsqueeze(1).to(self.device)
             tgt_mask = tgt_mask.unsqueeze(1).int().to(self.device).bool()   # TODO: check if the boolean tensor bug is fixed
@@ -336,6 +352,49 @@ class FaceSwapping(VideoProcessBase):
 
             # Final result
             result_tensor = blend_tensor * soft_tgt_mask + tgt_frame * (1 - soft_tgt_mask)
+            if i<=9:
+
+                # print("----------------------------------------------------------------------")
+                # print("type of result_tensor")
+                # print(type(result_tensor))
+                # print(result_tensor.shape)
+                # print("type of tgt_frame")
+                # print(type(tgt_frame))
+                # print(tgt_frame.shape)
+                for i_temp in range(8):
+                    img_tgt=tgt_frame[i_temp].cpu().numpy()
+                    img_result=result_tensor[i_temp].cpu().numpy()
+                    
+
+                    img_tgt_cv2=np.transpose(img_tgt,(1,2,0))
+                    img_result_cv2=np.transpose(img_result,(1,2,0))
+                    norm_tgt=cv2.normalize(img_tgt_cv2, None, alpha = 0, beta = 255, norm_type = cv2.NORM_MINMAX, dtype = cv2.CV_32F)
+                    norm_tgt=norm_tgt.astype(np.uint8)
+                    norm_result=cv2.normalize(img_result_cv2, None, alpha = 0, beta = 255, norm_type = cv2.NORM_MINMAX, dtype = cv2.CV_32F)
+                    norm_result=norm_result.astype(np.uint8)
+
+                    img_tgt=cv2.cvtColor(norm_tgt,cv2.COLOR_BGR2RGB)
+                    img_result=cv2.cvtColor(norm_result,cv2.COLOR_BGR2RGB)
+                    # print(img_tgt)
+                    
+                    # gray_tgt=img_tgt.convert("L")
+                    # gray_result=img_result.convert("L")
+                    # diff_img=ImageChops.subtract(img_tgt,img_result)
+                    # diff_arr=np.array(diff_img)
+                    # err = np.sum(diff_arr**2)
+                    
+                    # mse = err/(float(diff_img.size[0]*diff_img.size[1]))
+                    # print("mse")
+                    # print(mse)
+                    # gray_tgt=img_tgt.convert("L")
+                    # gray_result=img_result.convert("L")
+
+                    pth1=f'/home/sxg1373/RHA/temp_images/img_tgt{i}_{i_temp}.png'
+                    pth2=f'/home/sxg1373/RHA/temp_images/img_result_{i}_{i_temp}.png'
+                    cv2.imwrite(pth1,img_tgt)
+                    cv2.imwrite(pth2,img_result)
+
+                # print("----------------------------------------------------------------------")
 
             # Write output
             if self.verbose == 0:
@@ -369,7 +428,7 @@ class FaceSwappingRenderer(VideoRenderer):
         self._appearance_map = None
         self._fig = None
         self._figsize = (24, 16)
-
+        print("INSIDE INIT OF FACESWAPPINGRENDERER")
         # Calculate verbose size
         verbose_size, self._appearance_map_size = None, None
         if verbose == 1:
