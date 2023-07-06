@@ -81,6 +81,9 @@ if __name__=='__main__':
         j=0
         fs_list=[]
         or_list=[]
+        val_a=-1
+        val_sim=0
+        a_prev=-1
         while(fs_v.isOpened() or or_v.isOpened()):
 
             if fs_v.isOpened():
@@ -106,7 +109,6 @@ if __name__=='__main__':
                     #store images in a list or_arr
                 except:
                     break
-
         print("reading frames complete")
         # print(len(fs_list))
         # print(len(or_list))
@@ -119,7 +121,7 @@ if __name__=='__main__':
         mtcnn=MTCNN()
         boxes_nearby_times = dict()
         frames_nearby_times = dict()
-        
+        fc=[]
         for nframe in tqdm(range(len(fs_list))):
             # pass
             faces_fs=detect_faces(fs_list[nframe],mtcnn)
@@ -128,8 +130,7 @@ if __name__=='__main__':
             boxes_nearby_times[nframe] = [Box(*face) for face in faces_fs]
             if faces_fs:
                 do_anno=compute_similarity(faces_fs,fs_list[nframe],faces_or,or_list[nframe])
-                print(do_anno)
-                # 0 or 1 
+
 
             # for anno in do_anno:
             a=0
@@ -137,58 +138,58 @@ if __name__=='__main__':
                 a= (a|anno)
                 
             # print(a)
-    
             prev_prev_t = nframe - 2 * args.time_delta
             prev_t = nframe - args.time_delta
             this_t = nframe
             next_t = nframe + args.time_delta
-            if a or len(faces_fs)==0:
-        # see nearby frames
-                if prev_t < 0:
-                    pass          
-                elif prev_t >= 0 and prev_prev_t < 0:
-                    img = frames_nearby_times[prev_t]
-                    faces = boxes_nearby_times[prev_t]
-                    faces = [face.tolist() for face in faces]
-                    for face in faces:
-                        draw_box(face, img, args.shape, white_color)
-                    assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
-                    writer.write(img)
-                    del frames_nearby_times[prev_t]
+            
+            if prev_t>=0:
+                if a_prev or len(faces_fs)==0:
+            # see nearby frames       
+                    if prev_t >= 0 and prev_prev_t < 0:
+                        img = frames_nearby_times[prev_t]
+                        faces = boxes_nearby_times[prev_t]
+                        faces = [face.tolist() for face in faces]
+                        for face in faces:
+                            draw_box(face, img, args.shape, white_color)
+                        assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
+                        writer.write(img)
+                        del frames_nearby_times[prev_t]
 
+                    else:
+                        prev_prev_boxes = boxes_nearby_times[prev_prev_t]
+                        prev_boxes = boxes_nearby_times[prev_t]    
+                        this_boxes = boxes_nearby_times[this_t]
+
+                        img = frames_nearby_times[prev_t]
+                        faces = boxes_nearby_times[prev_t]
+                        faces = [face.tolist() for face in faces]
+                        for face in faces:
+                            draw_box(face, img, args.shape, white_color)
+                        assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
+                        writer.write(img)
+                        del frames_nearby_times[prev_t]
                 else:
-                    prev_prev_boxes = boxes_nearby_times[prev_prev_t]
-                    prev_boxes = boxes_nearby_times[prev_t]    
-                    this_boxes = boxes_nearby_times[this_t]
-
-                    img = frames_nearby_times[prev_t]
-                    faces = boxes_nearby_times[prev_t]
-                    faces = [face.tolist() for face in faces]
-                    if len(faces) != 2:
-                        pass
-                    for face in faces:
-                        draw_box(face, img, args.shape, white_color)
-                    assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
-                    writer.write(img)
-                    del frames_nearby_times[prev_t]
-            else:
-                if prev_t>=0:
+                    # if prev_t>=0:
                     img=frames_nearby_times[prev_t]
                     assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
                     writer.write(img)
                     del frames_nearby_times[prev_t]
 
-            #     # if face detected
-            #         # compute similarity
-            #     # if found similar or faces not detected
-            #         # blur all the faces present in that frame 
+            a_prev=a
+
+                #     # if face detected
+                #         # compute similarity
+                #     # if found similar or faces not detected
+                #         # blur all the faces present in that frame 
+
     except KeyboardInterrupt:
-        print(temp)
+        pass
+        # print("______________________________________________")
+        # print(temp[171])
+        # print(fc)
+        # print(val_a)
+        # print(len(fc[0]))
+        # print("______________________________________________")
 
-
-
-            
-
-            
-
-
+        # print(a)
