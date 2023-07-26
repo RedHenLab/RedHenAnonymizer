@@ -71,6 +71,7 @@ def get_mediatype(metadata):
     
     codecs = [m['codec_type'] for m in metadata['streams']]    
     codecs = list(set(codecs))
+    print(codecs)
     if len(codecs) == 1:
         if codecs[0] == 'video':
             return 'video'
@@ -135,9 +136,15 @@ if __name__ == '__main__':
         os.makedirs(temp_dir, exist_ok=True)
         inpath = osp.abspath(args.inpath)
         outpath = osp.abspath(args.outpath)
-        
+        # preprocessing video
+        # removing subtitle
+        # vid_path=
+        # sub_cmd=f'ffmpeg -i {inpath} -sn -c copy {}'
+        # # converting to standard format
+        # ##
+
         metadata = ffmpeg.probe(inpath)    
-        
+        print(metadata['streams'])
         mediatype = get_mediatype(metadata)
         anonymize = args.anonymize
         if anonymize not in mediatype:
@@ -192,15 +199,14 @@ if __name__ == '__main__':
                 error = os.system(fsgan_cmd)
                 if error:
                     raise Exception(f'unable to swap faces. Check fsgan. error code: {error}')
-                
-                # outvideo_path = fsgan_outpath
+                outvideo_path = fsgan_outpath
                 ##########################################################################
                 print("removing flickers")
                 flicker_free_outpath=osp.join(temp_dir,'flicker_out.mp4')
                 flicker_cmd=f'python3 flicker.py -if {fsgan_outpath} -io {videoonly_path} -op {flicker_free_outpath}'
                 error=os.system(flicker_cmd)
                 if error:
-                    raise Exception(f'unable to remove flickers. Check flicker.py. error code: {error}')
+                     raise Exception(f'unable to remove flickers. Check flicker.py. error code: {error}')
                 
                 outvideo_path=flicker_free_outpath
                 ##########################################################################
