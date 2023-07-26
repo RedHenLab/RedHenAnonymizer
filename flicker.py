@@ -1,6 +1,5 @@
 import cv2
 import argparse
-from skimage.metrics import structural_similarity as ssim
 import numpy as np
 from hide_face_robust import Box,detect_faces,draw_box,get_video_properties
 from mtcnn.mtcnn import MTCNN
