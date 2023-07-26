@@ -77,111 +77,88 @@ if __name__=='__main__':
         white_color = (255, 255, 255)
         print(fs_v_length)
         print(or_v_length)
-        i=0
-        j=0
-        fs_list=[]
-        or_list=[]
         val_a=-1
         val_sim=0
         a_prev=-1
-        while(fs_v.isOpened() or or_v.isOpened()):
-
-            if fs_v.isOpened():
-                try:
-                    _,fs_frame=fs_v.read()
-                    if fs_frame.any()==False:
-                        break 
-                    # cv2.imwrite(f"/home/saksham/Desktop/RED_HEN/fs_frame/frame{i}.png",fs_frame)
-                    i=i+1
-                    # print(i)
-                    fs_list.append(fs_frame)
-                    #store images in a list fs_arr
-                except:
-                    break
-            if or_v.isOpened():
-                try:
-                    _,or_frame=or_v.read()
-                    if or_frame.any()==False:
-                        break
-                    # cv2.imwrite(f"/home/saksham/Desktop/RED_HEN/or_frame/frame{j}.png",or_frame)
-                    j=j+1
-                    or_list.append(or_frame)
-                    #store images in a list or_arr
-                except:
-                    break
-        print("reading frames complete")
-        # print(len(fs_list))
-        # print(len(or_list))
-        # print(i)
-        # print(j)
-        # remove i-j starting elements from fs_frame
-        if i-j>0:
-            fs_list=fs_list[i-j:]
-        print(len(fs_list))
         mtcnn=MTCNN()
         boxes_nearby_times = dict()
         frames_nearby_times = dict()
         fc=[]
-        for nframe in tqdm(range(len(fs_list))):
-            # pass
-            faces_fs=detect_faces(fs_list[nframe],mtcnn)
-            faces_or=detect_faces(or_list[nframe],mtcnn)
-            frames_nearby_times[nframe]=fs_list[nframe]
-            boxes_nearby_times[nframe] = [Box(*face) for face in faces_fs]
-            if faces_fs:
-                do_anno=compute_similarity(faces_fs,fs_list[nframe],faces_or,or_list[nframe])
+        nframe=0
+        while(fs_v.isOpened() or or_v.isOpened()):
+            print("hi")
+            if fs_v.isOpened() and or_v.isOpened():
+                try:
+                    _,fs_frame=fs_v.read()
+                    _,or_frame=or_v.read()
+
+                    if fs_frame.any()==False or or_frame.any()==False:
+                        break 
+                    # cv2.imwrite(f"/home/saksham/Desktop/RED_HEN/fs_frame/frame{i}.png",fs_frame)
+                    faces_fs=detect_faces(fs_frame,mtcnn)
+                    faces_or=detect_faces(or_frame,mtcnn)
+                    frames_nearby_times[nframe]=fs_frame
+                    boxes_nearby_times[nframe] = [Box(*face) for face in faces_fs]
+                    if faces_fs:
+                        do_anno=compute_similarity(faces_fs,fs_frame,faces_or,or_frame)
 
 
-            # for anno in do_anno:
-            a=0
-            for anno in do_anno.values():
-                a= (a|anno)
-                
-            # print(a)
-            prev_prev_t = nframe - 2 * args.time_delta
-            prev_t = nframe - args.time_delta
-            this_t = nframe
-            next_t = nframe + args.time_delta
+                    # for anno in do_anno:
+                    a=0
+                    for anno in do_anno.values():
+                        a= (a|anno)
+                        
+                    # print(a)
+                    prev_prev_t = nframe - 2 * args.time_delta
+                    prev_t = nframe - args.time_delta
+                    this_t = nframe
+                    next_t = nframe + args.time_delta
+                    
+                    if prev_t>=0:
+                        if a_prev or len(faces_fs)==0:
+                    # see nearby frames       
+                            if prev_t >= 0 and prev_prev_t < 0:
+                                img = frames_nearby_times[prev_t]
+                                faces = boxes_nearby_times[prev_t]
+                                faces = [face.tolist() for face in faces]
+                                for face in faces:
+                                    draw_box(face, img, args.shape, white_color)
+                                assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
+                                writer.write(img)
+                                del frames_nearby_times[prev_t]
+
+                            else:
+                                prev_prev_boxes = boxes_nearby_times[prev_prev_t]
+                                prev_boxes = boxes_nearby_times[prev_t]    
+                                this_boxes = boxes_nearby_times[this_t]
+
+                                img = frames_nearby_times[prev_t]
+                                faces = boxes_nearby_times[prev_t]
+                                faces = [face.tolist() for face in faces]
+                                for face in faces:
+                                    draw_box(face, img, args.shape, white_color)
+                                assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
+                                writer.write(img)
+                                del frames_nearby_times[prev_t]
+                        else:
+                            # if prev_t>=0:
+                            img=frames_nearby_times[prev_t]
+                            assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
+                            writer.write(img)
+                            del frames_nearby_times[prev_t]
+
+                    a_prev=a
+
+                        #     # if face detected
+                        #         # compute similarity
+                        #     # if found similar or faces not detected
+                        #         # blur all the faces present in that frame 
+                    nframe=nframe+1
+
+                except:
+                    print("inside except of fs_v")
+                    break
             
-            if prev_t>=0:
-                if a_prev or len(faces_fs)==0:
-            # see nearby frames       
-                    if prev_t >= 0 and prev_prev_t < 0:
-                        img = frames_nearby_times[prev_t]
-                        faces = boxes_nearby_times[prev_t]
-                        faces = [face.tolist() for face in faces]
-                        for face in faces:
-                            draw_box(face, img, args.shape, white_color)
-                        assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
-                        writer.write(img)
-                        del frames_nearby_times[prev_t]
-
-                    else:
-                        prev_prev_boxes = boxes_nearby_times[prev_prev_t]
-                        prev_boxes = boxes_nearby_times[prev_t]    
-                        this_boxes = boxes_nearby_times[this_t]
-
-                        img = frames_nearby_times[prev_t]
-                        faces = boxes_nearby_times[prev_t]
-                        faces = [face.tolist() for face in faces]
-                        for face in faces:
-                            draw_box(face, img, args.shape, white_color)
-                        assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
-                        writer.write(img)
-                        del frames_nearby_times[prev_t]
-                else:
-                    # if prev_t>=0:
-                    img=frames_nearby_times[prev_t]
-                    assert img.shape == (height, width, 3), f'img.shape = {img.shape}, height = {height}, width = {width}'
-                    writer.write(img)
-                    del frames_nearby_times[prev_t]
-
-            a_prev=a
-
-                #     # if face detected
-                #         # compute similarity
-                #     # if found similar or faces not detected
-                #         # blur all the faces present in that frame 
 
     except KeyboardInterrupt:
         pass
