@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+</head>
+
+<body>
+    <header>Red Hen Anonymizer</header>
+    <uploader>
+        <div class="wrapper">
+            <form action="#">
+                <input class="file-input" type="file" name="file" multiple hidden>
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Browse File to Upload</p>
+            </form>
+            <section class="progress-area"></section>
+            <section class="uploaded-area"></section>
+
+            <script src="script.js"></script>
+        </div>
+
+    <choices>
+    <section class="light">
+
+        <h1>Visual Anonymization</h1>
+
+        <label>
+            <input type="radio" name="light" >
+            <span class="design"></span>
+            <span class="text">OpenPose</span>
+        </label>
+
+        <label>
+            <input type="radio" name="light">
+            <span class="design"></span>
+            <span class="text">Face Hider</span>
+        </label>
+
+        <label>
+            <input type="radio" name="light">
+            <span class="design"></span>
+            <span class="text">Face Swapper</span>
+        </label>
+
+        </section>
+        <section class="light">
+        <h1>Audio Anonymization</h1>
+
+        <label>
+            <input type="radio" name="light" >
+            <span class="design"></span>
+            <span class="text">Customize</span>
+        </label>
+
+
+    </section>
+</choices>
+</uploader>
+</body>
+
+</html>
