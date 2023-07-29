@@ -81,3 +81,4 @@ function uploadFile(name) {
     let data = new FormData(form);
     xhr.send(data);
 }
+

@@ -11,57 +11,88 @@
 </head>
 
 <body>
-    <header>Red Hen Anonymizer</header>
-    <uploader>
-        <div class="wrapper">
-            <form action="#">
-                <input class="file-input" type="file" name="file" multiple hidden>
-                <i class="fas fa-cloud-upload-alt"></i>
+    <header class="container">
+        <nav class="flex">
+            <div class="left flex items-center">
+                <img src="https://lh5.googleusercontent.com/Bzv6utsQVigvUTjPovSG7FiKMzcUilben4miz_Cm9B6pvzFxTA4TSdpAIpL_Esiupe2LBw=w16383" alt="" >
+                <ul class="flex items-center justify-center">
+                    <li>Red Hen Anonymizer</li>
+                </ul>
+            </div>
+            <div class="right flex"></div>
+
+        </nav> 
+    </header>
+    <div>
+    
+        <uploader class="flex">
+            <div class="wrapper">
+                <form action="#" class="flex">
+                    <input class="file-input" type="file" name="file" multiple hidden>
+                    <i class="fas fa-cloud-upload-alt"></i>
                 <p>Browse File to Upload</p>
             </form>
             <section class="progress-area"></section>
             <section class="uploaded-area"></section>
-
+            
             <script src="script.js"></script>
         </div>
+        
+        <choices>
+            <div class="light av">
+                
+                <h1>Visual Anonymization</h1>
+                
+                <label>
+                    <input type="radio" name="light" class="file-input bullet">
+                    <span class="design"></span>
+                    <span class="text">OpenPose</span>
+                </label>
 
-    <choices>
-    <section class="light">
+                <label>
+                    <input type="radio" name="light" class="file-input bullet">
+                    <span class="design"></span>
+                    <span class="text">Face Hider</span>
+                </label>
+                
+                <label>
+                    <input type="radio" name="light" class="file-input bullet ">
+                    <span class="design"></span>
+                    <span class="text">Face Swapper</span>
+                </label>
+                
+            </div>
+            <div class="light av flex">
+                <h1>Audio Anonymization</h1>
+                <label>
+                    <input type="radio" name="light" class="file-input bullet ">
+                    <span class="design"></span>
+                    <span class="text">Customize</span>
+                    
+                </label>
+                <div class="range-slider" style='--min:0; --max:100; --step:5; --value:75; --text-value:"75";'>
+                    <input type="range" min="0" max="100" step="5" value="75" oninput="this.parentNode.style.setProperty('--value',this.value); this.parentNode.style.setProperty('--text-value', JSON.stringify(this.value))">
+                    <output></output>
+                    <div class='range-slider__progress'></div>
+                </div>
+                <div class="range-slider" style='--min:0; --max:100; --step:5; --value:75; --text-value:"75";'>
+                    <input type="range" min="0" max="100" step="5" value="75" oninput="this.parentNode.style.setProperty('--value',this.value); this.parentNode.style.setProperty('--text-value', JSON.stringify(this.value))">
+                    <output></output>
+                    <div class='range-slider__progress'></div>
+                </div>
+                  <div class="range-slider" style='--min:0; --max:100; --step:5; --value:75; --text-value:"75";'>
+                    <input type="range" min="0" max="100" step="5" value="75" oninput="this.parentNode.style.setProperty('--value',this.value); this.parentNode.style.setProperty('--text-value', JSON.stringify(this.value))">
+                    <output></output>
+                    <div class='range-slider__progress'></div>
+                </div>
 
-        <h1>Visual Anonymization</h1>
 
-        <label>
-            <input type="radio" name="light" >
-            <span class="design"></span>
-            <span class="text">OpenPose</span>
-        </label>
+            </div>
 
-        <label>
-            <input type="radio" name="light">
-            <span class="design"></span>
-            <span class="text">Face Hider</span>
-        </label>
+        </choices>
+    </uploader>
+</div>
 
-        <label>
-            <input type="radio" name="light">
-            <span class="design"></span>
-            <span class="text">Face Swapper</span>
-        </label>
-
-        </section>
-        <section class="light">
-        <h1>Audio Anonymization</h1>
-
-        <label>
-            <input type="radio" name="light" >
-            <span class="design"></span>
-            <span class="text">Customize</span>
-        </label>
-
-
-    </section>
-</choices>
-</uploader>
 </body>
 
 </html>
