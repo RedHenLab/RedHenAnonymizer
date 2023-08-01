@@ -176,6 +176,7 @@ width: 50%;
     align-items: center;
     flex-direction: column;
     position: relative;
+    padding-left:36px;
   }
   
   .av::before,
@@ -209,13 +210,12 @@ width: 50%;
     --other: hsl(0, 0%, 14%);
   
     background: rgb(255, 255, 255)
+    
   }
   
   /* h1 */
   h1 {
     color: var(--other);
-    padding: 8px 4px;
-    border-bottom: 2px solid var(--other);
   }
   
   
@@ -331,28 +331,76 @@ width: 50%;
     display:flex;
     justify-content: center;
     min-width: 913px;
-    margin: 90px;
-  }
-
-  
-.range-slider {
-    --progress-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2) inset;
-    --progress-flll-shadow: var(--progress-shadow);
-    --fill-color: linear-gradient(to right, LightCyan, var(--primary-color));
-    --thumb-shadow: 0 0 4px rgba(0, 0, 0, 0.3),
-      -3px 9px 9px rgba(255, 255, 255, 0.33) inset,
-      -1px 3px 2px rgba(255, 255, 255, 0.33) inset,
-      0 0 0 99px var(--primary-color) inset;
-  
+    margin: 10px;
+    flex-wrap: wrap;
   }
   
 nav ul li{
     list-style-type: none;
-    font-size: x-large;
+    font-size: larger;
     color: white;
 }
 
 .left img{
-    width: 83px;
-    height: 60px;
+width: 63px;
+height: 47px;
+}
+
+.right img{
+width: 49px;
+height: 42px;
+padding: 1px 2px;
+margin-top: 2px;
+}
+nav{
+  justify-content: space-between;
+}
+
+.break{
+  flex-basis: 100%;
+  width: 0;
+
+}
+.button{
+margin-top: 64px;
+border: 2px solid black;
+padding: 14px 38px;
+background: white;
+cursor: pointer;
+transition-duration: 0.4s;
+}
+
+.button:hover{
+  background-color: #000000;
+  color: white;
+}
+
+.slider{
+  -webkit-appearance: none;
+  appearance: none;
+  width: 50%;
+  height: 3px;
+  background: #000;
+  outline: none;
+  opacity: 0.4;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+
+.slider::-moz-range-thumb {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #f2f0f0;
+  cursor: pointer;
 }
