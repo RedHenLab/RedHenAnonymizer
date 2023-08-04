@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="../util/utils.css">
+
+</head>
+
+<body>
+    <header class="container">
+        <nav class="flex">
+            <div class="left flex items-center">
+                <img src="../img/redhen.png" alt="">
+                <ul class="flex items-center justify-center">
+                    <li>Red Hen Anonymizer</li>
+                </ul>
+            </div>
+            <div class="right flex">
+                <img src="../img/user.png" alt="">
+            </div>
+
+        </nav>
+    </header>
+    <uploader class="flex">
+        <div class="wrapper">
+            <form action="#" class="flex">
+                <input class="file-input" type="file" name="file" multiple hidden>
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Browse File to Upload</p>
+            </form>
+            <section class="progress-area"></section>
+            <section class="uploaded-area"></section>
+
+            <script src="script.js"></script>
+        </div>
+
+        <choices>
+            <div class="light av">
+
+                <h1>Visual Anonymization</h1>
+
+                <label>
+                    <input type="radio" name="light" class="file-input bullet">
+                    <span class="design"></span>
+                    <span class="text">OpenPose</span>
+                </label>
+
+                <label>
+                    <input type="radio" name="light" class="file-input bullet">
+                    <span class="design"></span>
+                    <span class="text">Face Hider</span>
+                </label>
+
+                <label>
+                    <input type="radio" name="light" class="file-input bullet ">
+                    <span class="design"></span>
+                    <span class="text">Face Swapper</span>
+                </label>
+
+            </div>
+            <div class="light av">
+                <h1>Audio Anonymization</h1>
+                <label>
+                    <input type="radio" name="light" class="file-input bullet ">
+                    <span class="design"></span>
+                    <span class="text">Customize</span>
+
+                </label>
+                <div class="flex items-center">
+                    <span style="padding-right: 52px;">Pitch</span>
+                    <input type="range" min="-10" max="10" step="1" value="0" class="slider">
+                </div>
+                <div class="flex items-center">
+                    <span style= "padding-right: 52px;">Echo</span>
+                    <input type="range" min="-10" max="10" step="1" value="0" class="slider">
+                </div>
+                <div class="flex items-center">
+                    <span style="padding-right: 15px;">Distortion</span>
+                    <input type="range" min="-10" max="10" step="1" value="0" class="slider">
+                </div>
+
+            </div>
+            <div class="break"></div>
+            <button type="button" class="button">Submit</button>
+        </choices>
+    </uploader>
+
+<footer>
+</footer>
+</body>
+
+</html>
