@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/static/main/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="../util/utils.css">
+    <link rel="stylesheet" href="/static/utils/utils.css">
 
 </head>
 
@@ -15,13 +15,13 @@
     <header class="container">
         <nav class="flex">
             <div class="left flex items-center">
-                <img src="../img/redhen.png" alt="">
+                <img src="/static/utils/redhen.png" alt="">
                 <ul class="flex items-center justify-center">
                     <li>Red Hen Anonymizer</li>
                 </ul>
             </div>
             <div class="right flex">
-                <img src="../img/user.png" alt="">
+                <a href="dashboard"><img src="/static/utils/user.png" alt=""></a>
             </div>
 
         </nav>
@@ -33,10 +33,11 @@
                 <i class="fas fa-cloud-upload-alt"></i>
                 <p>Browse File to Upload</p>
             </form>
+            <div class="flex">
             <section class="progress-area"></section>
             <section class="uploaded-area"></section>
-
-            <script src="script.js"></script>
+        </div>
+            <script src="/static/main/script.js"></script>
         </div>
 
         <choices>
