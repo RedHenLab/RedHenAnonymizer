@@ -34,6 +34,7 @@ nav ul li {
     list-style-type: none;
     font-size: larger;
     color: white;
+    padding: 8px;
 }
 
 header {

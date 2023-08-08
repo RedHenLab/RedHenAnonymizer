@@ -6,7 +6,7 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="/static/login/style.css">
     <link rel="stylesheet" href="/static/utils/utils.css">
-</head> 
+</head>
 <body>
     <header class="container">
         <nav class="flex">
@@ -19,20 +19,24 @@
             <div class="right flex">
                 <ul class="flex items-center justify-center register-login">
                     <li><a href="register" style="color: white;">Register</a></li>
-                    <li><a href="" style="color: white;">Login</a></li>
+                    <li><a href="/" style="color: white;">Login</a></li>
                 </ul>
             </div>
         
         </nav>
     </header>
 
-    <form method="POST" action="/">  
-        <div class="container-login flex justify-center ">   
+    <form method='POST' action='/register'>  
+        <div class="container-login flex justify-center " >   
+            <label>Name : </label>   
+            <input type="text" placeholder="Enter name" name="name" required>  
             <label>Username : </label>   
-            <input type="text" placeholder="Enter Username" name="username" required>  
+            <input type="text" placeholder="Enter username" name="username" required>  
             <label>Password : </label>   
             <input type="password" placeholder="Enter Password" name="password" required>  
-            <button type="submit">Login</button>   
+            <label>Email : </label>   
+            <input type="email" placeholder="Enter Email" name="email" required>  
+            <button type="submit">Register</button>   
         </div>   
     </form>     
 </body>
