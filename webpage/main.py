@@ -1,6 +1,11 @@
 from flask import Flask, render_template,request,redirect,flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, UserMixin, login_required,current_user, logout_user
+import os
+import json
+import glob
+from uuid import uuid4
+
 app=Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:@127.0.0.1/Anonymizer'
@@ -78,8 +83,40 @@ def upload():
         files=request.files
         form=request.form
 
+        upload_key=str(uuid4())
+        is_ajax = False
+        if form.get("__ajax", None) == "true":
+            is_ajax = True
+
+    # Target folder for these uploads.
+        target = "/home/saksham/Desktop/RED_HEN/RedHenAnonymizer/webpage/static/upload/{}".format(upload_key)
+        print(target)
+        try:
+            os.mkdir(target)
+        except:
+            if is_ajax:
+                print("could not create upload directory")
+                return ajax_response(False, "Couldn't create upload directory: {}".format(target))
+            else:
+                return "Couldn't create upload directory: {}".format(target)
         print(form)
         print(files)
-        return redirect("/dashboard")
+        for upload in request.files.getlist("file"):
+            filename = upload.filename.rsplit("/")[0]
+            destination = "/".join([target, filename])
+            print("Accept incoming file:", filename)
+            print("Save it to:", destination)
+            upload.save(destination)
 
+        if is_ajax:
+            return ajax_response(True, upload_key)
+        else:
+            return redirect("/dashboard")
+    
+def ajax_response(status, msg):
+    status_code = "ok" if status else "error"
+    return json.dumps(dict(
+        status=status_code,
+        msg=msg,
+    ))
 app.run(debug=True)
