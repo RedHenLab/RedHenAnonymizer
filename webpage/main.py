@@ -71,4 +71,15 @@ def main():
 def dashboard():
     return render_template("dashboard.html", Name=current_user.name, username=current_user.username)
 
+@app.route("/upload",methods=['POST','GET'])
+@login_required
+def upload():
+    if request.method=='POST':
+        files=request.files
+        form=request.form
+
+        print(form)
+        print(files)
+        return redirect("/dashboard")
+
 app.run(debug=True)

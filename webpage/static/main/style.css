@@ -80,12 +80,12 @@ section .row i {
 section .details span {
     font-size: 14px;
 }
-
+/* 
 .progress-area .row .content {
     width: 100%;
     margin-left: 15px;
-}
-
+} */
+/* 
 .progress-area .details {
     display: flex;
     align-items: center;
@@ -106,8 +106,8 @@ section .details span {
     width: 0%;
     background: #6990F2;
     border-radius: inherit;
-}
-
+} */
+/* 
 .uploaded-area {
     max-height: 232px;
     overflow-y: scroll;
@@ -139,7 +139,7 @@ section .details span {
 
 .uploaded-area i.fa-check {
     font-size: 16px;
-}
+} */
 
 /* ************************************************************************************ */
 
@@ -352,4 +352,22 @@ transition-duration: 0.4s;
   border-radius: 50%;
   background: #f2f0f0;
   cursor: pointer;
+}
+
+#uploader:hover{
+  cursor: pointer;
+
+}
+
+.progress-trough {
+  border: 1px solid #000000;
+  height: 24px;
+  width: 100%;
+  position: relative;
+}
+
+.progress-bar {
+  width: 50%;
+  height: 100%;
+  background-color: #0099FF;
 }

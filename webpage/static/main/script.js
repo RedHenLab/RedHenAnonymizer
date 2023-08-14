@@ -1,79 +1,114 @@
-const form = document.querySelector("form"),
-fileInput = document.querySelector(".file-input"),
-progressArea = document.querySelector(".progress-area"),
-uploadedArea = document.querySelector(".uploaded-area");
+var PENDING_FILES = [];
+UPLOAD_URL='/upload';
+NEXT_URL='/dashboard';
+$(document).ready(function () {
+    $("#uploader").on("click", function (e) {
+        // console.log(e)
+        if ($(e.target).is('#uploader')) {
+            $(".file-input").click();
+            $(".file-input").on("change", function () {
+                // console.log("file-input clicked")
+                handleFiles(this.files);
+            })
 
-form.addEventListener("click", () => {
-    fileInput.click();
-})
-fileInput.onchange = ({ target }) => {
-    console.log("here")
-    console.log(target.files)
-    all_files=target.files
-//     for (let i = 0; i < all_files.length; i++) {
-//         let file = target.files[i];
-//         if (file) {
-//             let fileName = file.name;
-//             if (fileName.length >= 12) {
-//                 let splitName = fileName.split('.');
-//                 fileName = splitName[0].substring(0, 13) + "... ." + splitName[1];
-//             }
-//             uploadFile(fileName);
-//         }
-//       } 
+        }
+    });
+
+    $(".button").on("click", function (e) {
+        $("#progress").show();
+        var $progressBar = $("#progress-bar");
+
+        // Gray out the form.
+        $("#upload-form :input").attr("disabled", "disabled");
+
+        // Initialize the progress bar.
+        $progressBar.css({ "width": "0%" });
+        e.preventDefault();
+        console.log("button-clicked")
+
+        var all_inputs = $("#upload-form :input")
+        console.log(all_inputs)
+
+        // collect the form data
+        var fd = new FormData();
+
+        all_inputs.each(function () {
+            var $this = $(this);
+            var name = $this.attr("name");
+            var type = $this.attr("type") || "";
+            var value = $this.attr("value");
+            if (type === "radio" && name === "visual_anonymization") {
+                if ($this.is(":checked")) {
+                    fd.append("visual_anonymization", value);
+                    console.log(value, "visual_anonymization");
+                }
+            } else {
+                if (name === 'pitch' || name === 'echo' || name === 'distortion') {
+                    fd.append(name, $this.val());
+                    console.log(name, $this.val());
+
+                }
+            }
+
+        })
+
+        //  attach the files
+        for (var i = 0, ie = PENDING_FILES.length; i < ie; i++) {
+            fd.append("file", PENDING_FILES[i]);
+            console.log(PENDING_FILES[i]);
+        }
+
+        fd.append("__ajax", "true");
+
+        var xhr = $.ajax({
+            xhr: function () {
+                var xhrobj = $.ajaxSettings.xhr();
+                if (xhrobj.upload) {
+                    xhrobj.upload.addEventListener("progress", function (event) {
+                        var percent = 0;
+                        var position = event.loaded || event.position;
+                        var total = event.total;
+                        if (event.lengthComputable) {
+                            percent = Math.ceil(position / total * 100);
+                        }
+
+                        // Set the progress bar.
+                        $progressBar.css({ "width": percent + "%" });
+                        $progressBar.text(percent + "%");
+                    }, false)
+                }
+                return xhrobj;
+
+            },
+            url: UPLOAD_URL,
+            method: "POST",
+            contentType: false,
+            processData: false,
+            cache: false,
+            data: fd,
+            success: function (data) {
+                $progressBar.css({ "width": "100%" });
+                console.log("data", data);
+                // data = JSON.parse(data);
+
+                // // How'd it go?
+                // if (data.status === "error") {
+                //     // Uh-oh.
+                //     window.alert(data.msg);
+                //     $("#upload-form :input").removeAttr("disabled");
+                //     return;
+                // }else{
+                window.location=NEXT_URL;
+                // }
+
+            },
+        })
+    })
+
+});
+
+function handleFiles(files) {
+    for (var i = 0, ie = files.length; i < ie; i++) {
+        PENDING_FILES.push(files[i]);
+    }
 }
-
-// function uploadFile(name) {
-
-//     let xhr = new XMLHttpRequest();
-//     xhr.open("POST", "php/upload.php");
-//     xhr.upload.addEventListener("progress", ({ loaded, total }) => {
-//         let fileLoaded = Math.floor((loaded / total) * 100);
-//         let fileTotal = Math.floor(total / 1000);
-//         let fileSize;
-//         (fileTotal < 1024) ? fileSize = fileTotal + " KB" : fileSize = (loaded / (1024 * 1024)).toFixed(2) + " MB";
-
-//         let progressHTML = `<li class="row">
-
-//     <i class="fas fa-file-alt"></i>
-
-// <span class="name">${name} • Uploading</span>
-
-// <span class="percent">${fileLoaded}%</span>
-
-// <div class="progress-bar">
-
-// <div class="progress" style="width: ${fileLoaded}%"></div>
-// </div>
-// </div>
-// </li>`;
-
-//         uploadedArea.classList.add("onprogress");
-
-//         progressArea.innerHTML = progressHTML;
-
-//         if (loaded == total) {
-//             progressArea.innerHTML = "";
-
-//             let uploadedHTML = `< li class="row" >
-
-//                         <div class="content upload">
-
-//                             <i class="fas fa-file-alt"></i>
-
-//                             <span class="name">${name} • Uploaded</span>
-
-//                             <span class="size">${fileSize}</span>
-
-//                             <i class="fas fa-check"></i>
-//                             `
-//             uploadedArea.classList.remove("onprogress");
-
-//             uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
-//         }
-//     });
-
-//     let data = new FormData(form);
-//     xhr.send(data);
-// }
-
