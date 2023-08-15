@@ -89,17 +89,17 @@ $(document).ready(function () {
             success: function (data) {
                 $progressBar.css({ "width": "100%" });
                 console.log("data", data);
-                // data = JSON.parse(data);
+                data = JSON.parse(data);
 
-                // // How'd it go?
-                // if (data.status === "error") {
-                //     // Uh-oh.
-                //     window.alert(data.msg);
-                //     $("#upload-form :input").removeAttr("disabled");
-                //     return;
-                // }else{
+                // How'd it go?
+                if (data.status === "error") {
+                    // Uh-oh.
+                    window.alert(data.msg);
+                    $("#upload-form :input").removeAttr("disabled");
+                    return;
+                }else{
                 window.location=NEXT_URL;
-                // }
+                }
 
             },
         })

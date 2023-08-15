@@ -5,7 +5,7 @@ import os
 import json
 import glob
 from uuid import uuid4
-
+from datetime import datetime
 app=Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:@127.0.0.1/Anonymizer'
@@ -13,6 +13,16 @@ app.secret_key = 'abrakndf'
 db=SQLAlchemy(app)
 login_manager=LoginManager()
 login_manager.init_app(app)
+
+class Video_details(UserMixin,db.Model):
+    sno= db.Column(db.Integer, primary_key=True)
+    username=db.Column(db.String(20), nullable=False)
+    filepath=db.Column(db.String(200), nullable=False)
+    date=db.Column(db.String(20),nullable=True)
+    # def __repr__(self):
+    #     return '<User %r>' % self.username
+    def get_id(self):
+        return (self.sno)
 
 class User(UserMixin,db.Model):
     sno= db.Column(db.Integer, primary_key=True)
@@ -24,6 +34,7 @@ class User(UserMixin,db.Model):
         return '<User %r>' % self.username
     def get_id(self):
         return (self.sno)
+    
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -107,7 +118,12 @@ def upload():
             print("Accept incoming file:", filename)
             print("Save it to:", destination)
             upload.save(destination)
+        now = datetime.now() 
 
+        video_details=Video_details(username=current_user.username, filepath=target, date=now.strftime('%Y-%m-%d %H:%M:%S'))
+        db.session.add(video_details)
+        db.session.commit()
+        
         if is_ajax:
             return ajax_response(True, upload_key)
         else:
