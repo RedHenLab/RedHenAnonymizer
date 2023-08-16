@@ -94,8 +94,9 @@ $(document).ready(function () {
                 // How'd it go?
                 if (data.status === "error") {
                     // Uh-oh.
-                    window.alert(data.msg);
+                    window.alert("Please enter files in correct format. Premissible formats are ['.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.mp4', '.m4p', '.m4v', '.avi', '.wmv']");
                     $("#upload-form :input").removeAttr("disabled");
+                    window.location='/main';
                     return;
                 }else{
                 window.location=NEXT_URL;

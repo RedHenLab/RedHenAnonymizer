@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request,redirect,flash
+from flask import Flask, render_template,request,redirect,flash, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, UserMixin, login_required,current_user, logout_user
 import os
@@ -6,10 +6,16 @@ import json
 import glob
 from uuid import uuid4
 from datetime import datetime
+from background_runner import BackgroundRunner
+from flask_executor import Executor
+
 app=Flask(__name__)
+executor = Executor(app)
+background_runner = BackgroundRunner(executor)
 
 app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:@127.0.0.1/Anonymizer'
 app.secret_key = 'abrakndf'
+app.config['UPLOAD_EXTENSIONS']=['.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.mp4', '.m4p', '.m4v', '.avi', '.wmv']
 db=SQLAlchemy(app)
 login_manager=LoginManager()
 login_manager.init_app(app)
@@ -110,10 +116,19 @@ def upload():
                 return ajax_response(False, "Couldn't create upload directory: {}".format(target))
             else:
                 return "Couldn't create upload directory: {}".format(target)
-        print(form)
-        print(files)
+        # print(form)
+        # print(files)
         for upload in request.files.getlist("file"):
             filename = upload.filename.rsplit("/")[0]
+            file_ext=os.path.splitext(filename)[1]
+            if file_ext not in app.config['UPLOAD_EXTENSIONS']:
+                os.rmdir(target)
+                if is_ajax:
+
+                    return ajax_response(False, upload_key)
+                else:
+                    flash("Please add only video files",'failure')
+                    return redirect("/main")
             destination = "/".join([target, filename])
             print("Accept incoming file:", filename)
             print("Save it to:", destination)
@@ -123,12 +138,18 @@ def upload():
         video_details=Video_details(username=current_user.username, filepath=target, date=now.strftime('%Y-%m-%d %H:%M:%S'))
         db.session.add(video_details)
         db.session.commit()
-        
+        task_id=background_runner.do_task_async(upload_key)
+        print(task_id)
         if is_ajax:
             return ajax_response(True, upload_key)
         else:
             return redirect("/dashboard")
     
+@app.route('/task_status/<task_id>')
+def task_status(task_id):
+    status = background_runner.task_status(task_id)
+    return jsonify({"status": status})
+ 
 def ajax_response(status, msg):
     status_code = "ok" if status else "error"
     return json.dumps(dict(
