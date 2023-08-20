@@ -124,7 +124,6 @@ def upload():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 os.rmdir(target)
                 if is_ajax:
-
                     return ajax_response(False, upload_key)
                 else:
                     flash("Please add only video files",'failure')
