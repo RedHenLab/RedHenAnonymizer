@@ -47,8 +47,8 @@
         <div class="flex right-body">
             <div class="flex table-an">
                 <div class="btn-grp">
-                <button type="button">Current Videos</button>
-                <button type="button">Anonymized Videos</button>
+                <!-- <button type="button">Current Videos</button> -->
+                <!-- <button type="button">Anonymized Videos</button> --> 
             </div>
                 <!-- <div class="break"></div> -->
                 <!-- <div class="flex"> -->
@@ -58,36 +58,28 @@
                       <th>Name</th>
                     <th>Type</th>
                     <th>Uploaded on</th>
-                    <th>Report</th>
+                    <th>Download</th>
                     </tr>
-                    <tr>
-                      <td>1</td>
-                      <td>Vid 1</td>
-                      <td>AudioVideo</td>
-                      <td>03/08/2023</td>
-                      <td>Click here</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Vid 2</td>
-                      <td>Video</td>
-                      <td>03/08/2023</td>
-                      <td>Click here</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>wefsd3</td>
-                      <td>Audio</td>
-                      <td>03/08/2023</td>
-                      <td>Click here</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>wefsdesfgd</td>
-                        <td>Audio</td>
-                        <td>03/08/2023</td>
-                        <td>Click here</td>
-                      </tr>
+                    {% for row in data %}
+                     <tr>
+                        {% for i in range(5) %}
+                        <!-- {cell} -->
+                        {% if i==4 %}
+                        <td><a href="download/{{row[i]}}">
+                            Click Here!
+                        </a></td>
+                        {%else%}
+                        <td>{{row[i]}}</td>
+                        {% endif %}
+                        <!-- <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td> -->
+
+                        {% endfor %}
+                     </tr>
+
+                    {% endfor %}
 
                   </table>
                 <!-- </div> -->

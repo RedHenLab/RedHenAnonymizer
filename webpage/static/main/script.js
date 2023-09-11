@@ -48,6 +48,10 @@ $(document).ready(function () {
                     console.log(name, $this.val());
 
                 }
+                if (name==='project_name'){
+                    fd.append(name, $this.val());
+                    console.log(name, $this.val());
+                }
             }
 
         })
