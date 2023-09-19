@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/main/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/static/utils/utils.css">
+
+</head>
+
+<body>
+    <header class="container">
+        <nav class="flex">
+            <div class="left flex items-center">
+                <img src="/static/utils/redhen.png" alt="">
+                <ul class="flex items-center justify-center">
+                    <li>Red Hen Anonymizer</li>
+                </ul>
+            </div>
+            <div class="right flex">
+                <a href="dashboard"><img src="/static/utils/user.png" alt=""></a>
+            </div>
+
+        </nav>
+    </header>
+    <form class="flex column justify-center items-center" method="POST" enctype="multipart/form-data" id="upload-form">
+        <!-- <div class="flex"> -->
+            <label for="fname">Project Name</label>
+            <input type="text" id="name" name="project_name"> 
+        <div class="wrapper flex justify-center items-center column" id="uploader">
+            <input class="file-input" type="file" name="file" multiple hidden>
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Browse File to Upload</p>
+            <div class="flex">
+                <section class="progress-area"></section>
+                <section class="uploaded-area"></section>
+            </div>
+        </div>
+
+        <!-- </div> -->
+        <!-- <div class="break"></div> -->
+        <choices>
+            <div class="light av">
+
+                <h1>Visual Anonymization</h1>
+
+                <label>
+                    <input type="radio" name="visual_anonymization" class="file-input bullet" value="openpose">
+                    <span class="design"></span>
+                    <span class="text">OpenPose</span>
+                </label>
+
+                <label>
+                    <input type="radio" name="visual_anonymization" class="file-input bullet" value="hider">
+                    <span class="design"></span>
+                    <span class="text">Face Hider</span>
+                </label>
+
+                <label>
+                    <input type="radio" name="visual_anonymization" class="file-input bullet " value="swapper">
+                    <span class="design"></span>
+                    <span class="text">Face Swapper</span>
+                </label>
+
+            </div>
+            <div class="light av">
+                <h1>Audio Anonymization</h1>
+                <label>
+                    <input type="radio" name="audio_anonymization" class="file-input bullet ">
+                    <span class="design"></span>
+                    <span class="text">Customize</span>
+
+                </label>
+                <div class="flex items-center">
+                    <span style="padding-right: 52px;">Pitch</span>
+                    <input type="range" min="-10" max="10" step="1" value="0" class="slider" name="pitch">
+                </div>
+                <div class="flex items-center">
+                    <span style="padding-right: 52px;">Echo</span>
+                    <input type="range" min="-10" max="10" step="1" value="0" class="slider" name="echo">
+                </div>
+                <div class="flex items-center">
+                    <span style="padding-right: 15px;">Distortion</span>
+                    <input type="range" min="-10" max="10" step="1" value="0" class="slider" name="distortion">
+                </div>
+
+            </div>
+            <div class="break"></div>
+            <fieldset id="progress" style="display: none">
+                <legend>Files Progress</legend>
+        
+                <div class="progress-trough">
+                    <div id="progress-bar" class="progress-bar">0%</div>
+                </div>
+            </fieldset><p>
+        
+            <input type="button" class="button" value="Submit" id="upload-btn">
+        </choices>
+    </form>
+
+
+    <footer>
+    </footer>
+</body>
+<script src="/static/jquery-3.7.0.min.js"></script>
+<script src="/static/main/script.js"></script>
+
+
+</html>
