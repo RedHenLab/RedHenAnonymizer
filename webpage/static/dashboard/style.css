@@ -1,0 +1,85 @@
+.left-body{
+    float: left;
+width: 25%;
+background: #e3e3e6;
+flex-direction: column;
+
+}
+.right-body{
+    flex-grow: 1;
+flex-wrap: wrap;
+float: right;
+background: white;
+    
+}
+.left-body img{
+    border-radius: 50%;
+    width: 250px;
+    margin: 55px auto;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+.table-an{
+    align-items: flex-start;
+    flex-wrap: wrap;
+    height: fit-content;
+    margin: 100px auto;
+    flex-direction: column;
+    width: 75%;
+}
+
+.setup{
+    width: 100%;
+    overflow: auto;
+    height: 720px;
+  
+}
+
+.btn-grp button {
+    background-color: #FFF;
+    border: 1px solid #bdbdbd;
+    color: rgb(0, 0, 0); /* White text */
+    padding: 10px 24px; /* Some padding */
+    cursor: pointer; /* Pointer/hand icon */
+    float: left; /* Float the buttons side by side */
+  }
+  
+  .btn-grp button:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+  }
+  
+  /* Clear floats (clearfix hack) */
+  .btn-grp:after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+  
+  /* Add a background color on hover */
+  .btn-grp button:hover {
+    background-color: #bdb6b2;
+  }
+
+  .bold{
+    font-weight: bold;
+    font-size: 40px;
+  }
+
+  .info{
+    margin: 17px 20px;
+  }
+
+  .fade{
+    font-size: 18px;
+    color: #464646;
+    padding-left:4px;
+  }

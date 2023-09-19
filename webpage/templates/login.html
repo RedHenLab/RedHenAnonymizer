@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/login/style.css">
+    <link rel="stylesheet" href="/static/utils/utils.css">
+</head> 
+<body>
+    <header class="container">
+        <nav class="flex">
+            <div class="left flex items-center">
+                <img src="/static/utils/redhen.png" alt="">
+                <ul class="flex items-center justify-center">
+                    <li>Red Hen Anonymizer</li>
+                </ul>
+            </div>
+            <div class="right flex">
+                <ul class="flex items-center justify-center register-login">
+                    <li><a href="register" style="color: white;">Register</a></li>
+                    <li><a href="" style="color: white;">Login</a></li>
+                </ul>
+            </div>
+        
+        </nav>
+    </header>
+
+    <form method="POST" action="/">  
+        <div class="container-login flex justify-center ">   
+            <label>Username : </label>   
+            <input type="text" placeholder="Enter Username" name="username" required>  
+            <label>Password : </label>   
+            <input type="password" placeholder="Enter Password" name="password" required>  
+            <button type="submit">Login</button>   
+        </div>   
+    </form>     
+</body>
