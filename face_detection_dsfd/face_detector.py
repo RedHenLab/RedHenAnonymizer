@@ -59,7 +59,6 @@ class FaceDetector(object):
         if os.path.isfile(output_path):
             return
         print('=> Detecting faces in video: "%s..."' % os.path.basename(input_path))
-
         # Open input video file
         cap = cv2.VideoCapture(input_path)
         if not cap.isOpened():
@@ -140,7 +139,7 @@ class FaceDetector(object):
         # Write to file
         with open(output_path, 'wb') as f:
             pickle.dump(det_list, f)
-
+        
         # Reset default tensor type
         torch.set_default_tensor_type('torch.FloatTensor')
 

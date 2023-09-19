@@ -8,7 +8,9 @@ the extension, residing in the same directory as the file. The information conta
 and cropped videos per sequence. In addition for each cropped video, the corresponding pose, landmarks, and
 segmentation masks will be computed and cached.
 """
-
+import torchvision
+import torchvision.transforms as T
+from PIL import Image,ImageChops
 import os
 import argparse
 import sys
@@ -241,7 +243,6 @@ class FaceSwapping(VideoProcessBase):
         # Cache input
         source_cache_dir, source_seq_file_path, _ = self.cache(source_path)
         target_cache_dir, target_seq_file_path, _ = self.cache(target_path)
-
         # Load sequences from file
         with open(source_seq_file_path, "rb") as fp:  # Unpickling
             source_seq_list = pickle.load(fp)
@@ -277,7 +278,6 @@ class FaceSwapping(VideoProcessBase):
 
         # Initialize video writer
         self.video_renderer.init(target_path, target_seq, output_path, _appearance_map=appearance_map)
-
         # Finetune reenactment model on source sequences
         if finetune:
             self.finetune(src_vid_seq_path, self.finetune_save)
@@ -336,7 +336,6 @@ class FaceSwapping(VideoProcessBase):
 
             # Final result
             result_tensor = blend_tensor * soft_tgt_mask + tgt_frame * (1 - soft_tgt_mask)
-
             # Write output
             if self.verbose == 0:
                 self.video_renderer.write(result_tensor)
@@ -369,7 +368,6 @@ class FaceSwappingRenderer(VideoRenderer):
         self._appearance_map = None
         self._fig = None
         self._figsize = (24, 16)
-
         # Calculate verbose size
         verbose_size, self._appearance_map_size = None, None
         if verbose == 1:

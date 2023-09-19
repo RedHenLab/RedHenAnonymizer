@@ -9,6 +9,11 @@ from fsgan.utils.bbox_utils import scale_bbox, crop_img
 from fsgan.utils.landmarks_utils import hflip_face_landmarks_68pts
 
 
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
+
 def interpolation_str2int(interpolation):
     if isinstance(interpolation, (list, tuple)):
         return [interpolation_str2int(i) for i in interpolation]
@@ -222,8 +227,8 @@ class Resize(ImgLandmarksTransform):
     """
 
     def __init__(self, size, interpolation='cubic'):
-        assert isinstance(size, int) or (isinstance(size, collections.Iterable) and len(size) == 2)
-        self.size = size if isinstance(size, collections.Iterable) else (size, size)
+        assert isinstance(size, int) or (isinstance(size, collectionsAbc.Iterable) and len(size) == 2)
+        self.size = size if isinstance(size, collectionsAbc.Iterable) else (size, size)
         self.interpolation = interpolation_str2int(interpolation)
 
     def process(self, img_list, landmarks_list=None):

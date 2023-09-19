@@ -10,3 +10,14 @@ TestVideos/
 facebank/
 results/
 fsgan/weights
+run_multiple.py
+temp_images/
+IFA_results/
+lab_interview_results/
+lab_interview_videos/
+flicker_free_results/
+openpose_containers_focal_nvcaffe.sif
+stickfigs.sif
+hidden_faceBAD.mp4
+Sujeto_videos/
+Sujeto_results_complete/

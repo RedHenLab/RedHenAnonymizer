@@ -446,7 +446,6 @@ class VideoProcessBase(object):
         # Face detection
         if not os.path.isfile(det_file_path):
             self.face_detector(input_path, det_file_path)
-
         # Detections to sequences
         if not os.path.isfile(seq_file_path):
             detections2sequences_main(input_path, seq_file_path, det_file_path, self.iou_thresh, self.min_length,

@@ -110,7 +110,6 @@ if __name__ == '__main__':
     # videocapture        
     assert osp.exists(args.inpath), args.inpath + " not found"
     vidcap = cv2.VideoCapture(args.inpath)
-
     # video meta data
     frame_count, fps, width, height = get_video_properties(vidcap)
 
@@ -128,7 +127,6 @@ if __name__ == '__main__':
     
     # the "close" distance threshold
     close = args.distance_threshold * min(height, width)
-    
     for nframe in tqdm(range(frame_count)):
         
         success, img = vidcap.read()

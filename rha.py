@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument('-a', '--anonymize', type=str, required=True, choices=anonymize_choices, help='anonymize which data? audio, video or audio+video')
     parser.add_argument('-p', '--pitch', type=float, default=default_pitch, help='pitch change amount, can be +/-')
     parser.add_argument('--distortion', type=float, default=0, help=f'amount of distortion to be added in the audio, preferred: {default_distortion_gain_db}')
-    parser.add_argument('--echo', type=float, default=0, help=f'amount of echo to be added in the audio, preferred: {default_echo_gain_in}')
+    parser.add_argument('--echo', type=float, default=0.8, help=f'amount of echo to be added in the audio, preferred: {default_echo_gain_in}')
     parser.add_argument('--cpu_only', action='store_true', help='Run on cpu only. However this flag is only for swapper. Hider will use/not use gpu depending on the tensorflow type you have installed. For tensorflow you can have a gpu or a cpu version.')
     parser.add_argument('--hider_shape', type=str, default=hider_shape_default, help='shape of hiding artifiact')
     parser.add_argument('--openpose_blending', action='store_true', help='blend Openpose output. This will add stick figures on the video. In disabled state, the stick figures will only have black background.')
@@ -71,6 +71,7 @@ def get_mediatype(metadata):
     
     codecs = [m['codec_type'] for m in metadata['streams']]    
     codecs = list(set(codecs))
+    print(codecs)
     if len(codecs) == 1:
         if codecs[0] == 'video':
             return 'video'
@@ -135,9 +136,15 @@ if __name__ == '__main__':
         os.makedirs(temp_dir, exist_ok=True)
         inpath = osp.abspath(args.inpath)
         outpath = osp.abspath(args.outpath)
-        
+        # preprocessing video
+        # removing subtitle
+        # vid_path=
+        # sub_cmd=f'ffmpeg -i {inpath} -sn -c copy {}'
+        # # converting to standard format
+        # ##
+
         metadata = ffmpeg.probe(inpath)    
-        
+        print(metadata['streams'])
         mediatype = get_mediatype(metadata)
         anonymize = args.anonymize
         if anonymize not in mediatype:
@@ -192,9 +199,17 @@ if __name__ == '__main__':
                 error = os.system(fsgan_cmd)
                 if error:
                     raise Exception(f'unable to swap faces. Check fsgan. error code: {error}')
-                
                 outvideo_path = fsgan_outpath
-            
+                ##########################################################################
+                print("removing flickers")
+                flicker_free_outpath=osp.join(temp_dir,'flicker_out.mp4')
+                flicker_cmd=f'python3 flicker.py -if {fsgan_outpath} -io {videoonly_path} -op {flicker_free_outpath}'
+                error=os.system(flicker_cmd)
+                if error:
+                     raise Exception(f'unable to remove flickers. Check flicker.py. error code: {error}')
+                
+                outvideo_path=flicker_free_outpath
+                ##########################################################################
             elif args.visual_anonymization == 'hider':
                 # use face hider if --facepath is not provided
                 print("Hiding the face, as the facepath argument was empty")
