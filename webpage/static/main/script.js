@@ -117,3 +117,23 @@ function handleFiles(files) {
         PENDING_FILES.push(files[i]);
     }
 }
+
+var pitch_val=document.getElementById("pitch")
+var pitch_out=document.getElementById("pitch_value")
+pitch_out.innerHTML = pitch_val.value;
+pitch_val.oninput = function() {
+    pitch_out.innerHTML = this.value;
+  }
+
+var echo_val=document.getElementById("echo")
+var echo_out=document.getElementById("echo_value")
+echo_out.innerHTML = echo_val.value;
+echo_val.oninput = function() {
+    echo_out.innerHTML = this.value;
+}
+var distortion_val=document.getElementById("distortion")
+var distortion_out=document.getElementById("distortion_value")
+distortion_out.innerHTML = pitch_val.value;
+distortion_val.oninput = function() {
+    distortion_out.innerHTML = this.value;
+    }

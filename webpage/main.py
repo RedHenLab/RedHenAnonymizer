@@ -188,7 +188,7 @@ def upload():
         project_info={"project_name": form.get("project_name",None),
         "visual_anonymization": form.get("visual_anonymization",None),
         "pitch": form.get("pitch",None),
-        "echo":str(float(form.get("echo",None))/10),
+        "echo":str(float(form.get("echo",None))),
         "distortion":form.get("distortion",None),
 	"status":"0"       
         }
