@@ -22,3 +22,6 @@ hidden_faceBAD.mp4
 Sujeto_videos/
 Sujeto_results_complete/
 webpage/static/upload/
+.pytest_cache/
+__pycache__/
+*.pyc

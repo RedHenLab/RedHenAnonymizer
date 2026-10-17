@@ -6,6 +6,7 @@ import argparse
 import os.path as osp
 import subprocess
 
+import tempfile
 assert sys.version_info[0] >= 3, 'Python version below 3 are not allowed'
 
 def parse_args():
@@ -121,171 +122,172 @@ def get_offset_args(metadata):
     return audio_start_arg, video_start_arg
         
 
+def main(args):
+    assert osp.exists(args.inpath), 'path not found: ' + args.inpath
+    inpath = osp.abspath(args.inpath)
+    outpath = osp.abspath(args.outpath)
+
+    # create a temporary directory using tempfile to store the intermediate outputs
+    with tempfile.TemporaryDirectory(prefix='anon_tmp_') as temp_dir:
+        temp_dir = osp.abspath(temp_dir)
+        try:
+        
+            metadata = ffmpeg.probe(inpath)    
+        
+            mediatype = get_mediatype(metadata)
+            anonymize = args.anonymize
+            if anonymize not in mediatype:
+                raise Exception(f'Cannot anonymize {anonymize} when input file is {mediatype}')
+        
+            audio_start_arg, video_start_arg = get_offset_args(metadata)
+
+            audcodec = 'wav'
+            vidcodec = 'mp4'
+            if args.visual_anonymization == 'stickfigs':
+                vidcodec = 'avi'
+
+            videoonly_path = osp.join(temp_dir, f'videoonly.{vidcodec}')
+            audioonly_path = osp.join(temp_dir, f'audioonly.{audcodec}')
+        
+            outvideo_path = ""
+            outaudio_path = ""
+        
+            # separate out video
+            if 'video' in mediatype:
+                print('Separating video from input')
+                # BEWARE! I put -c copy here, but that will work best if the file is already something like h.264; in the long run we need to probe and then decide what to do (see issues on GitHub).
+                video_cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y -i {inpath} -c copy -an {videoonly_path}' 
+                error = subprocess.call(video_cmd, shell=True)
+                if error:
+                    raise Exception('Error in separating video out of input file')
+                outvideo_path = videoonly_path
+            # separate out audio
+            if 'audio' in mediatype:
+                print('Separating audio from input')
+                audio_cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y -i {inpath} -vn {audioonly_path}'
+                error = subprocess.call(audio_cmd, shell=True)
+                if error:
+                    raise Exception('Error in separating audio out of input file')
+                outaudio_path = audioonly_path
+            
+            if 'video' in mediatype and 'video' in anonymize:
+            
+                if args.visual_anonymization == 'swapper':
+                    assert args.facepath is not None, '--facepath option cannot be None for visual_anonymization/va=swapper'
+                    swappy_path = osp.join(osp.dirname(__file__), 'fsgan', 'inference', 'swap.py')
+                    assert osp.exists(swappy_path), f'path not found: {swappy_path}'
+                    facepath = osp.abspath(args.facepath)
+                    assert osp.exists(facepath), f'facepath does not exist {facepath}'
+                    print("Swapping faces, with the face:", facepath)
+                    print('Input video:', inpath)
+                    device_flag = ""
+                    if args.cpu_only:
+                        device_flag = " --cpu_only "
+                    # swap faces
+                    fsgan_outpath = osp.join(temp_dir, 'fsgan_out.mp4')
+                    fsgan_cmd = f'python3 {swappy_path} {facepath} -t {videoonly_path} -o {fsgan_outpath} --seg_remove_mouth --encoder_codec mp4v {device_flag}'
+                    error = os.system(fsgan_cmd)
+                    if error:
+                        raise Exception(f'unable to swap faces. Check fsgan. error code: {error}')
+                
+                    outvideo_path = fsgan_outpath
+            
+                elif args.visual_anonymization == 'hider':
+                    # use face hider if --facepath is not provided
+                    print("Hiding the face, as the facepath argument was empty")
+                    mtcnn_outpath = osp.join(temp_dir, "hidden_face.mp4")
+                    hide_face_py_path = osp.join(osp.dirname(__file__), 'hide_face_robust.py')
+                    assert osp.exists(hide_face_py_path), f"file not found: {hide_face_py_path}"
+                    mtcnn_cmd = f"python3 {hide_face_py_path} --inpath {videoonly_path} --outpath {mtcnn_outpath} --shape {args.hider_shape}"
+                    error = os.system(mtcnn_cmd)
+                    if error:
+                        raise Exception(f"unable to run face hider. Check hide_face_robust.py. error code: {error}")
+                
+                    outvideo_path = mtcnn_outpath
+                
+                elif args.visual_anonymization == 'stickfigs':
+                
+                    # the core command to container has to be like: 
+                    # singularity run -B /mnt/rds/redhen/gallina/home/yck5/ --nv stickfigs.sif 
+                    # --video /mnt/rds/redhen/gallina/home/yck5/TestVideos/q.mp4 --face --hand 
+                    # -write_video /mnt/rds/redhen/gallina/home/yck5/results/out.avi 
+                    # --display 0 --model_folder /opt/openpose_models/
+                
+                    # first let's check container
+                    binding_path = args.openpose_bind
+                    container_path = args.openpose_container
+                    model_folder = args.openpose_modelfolder
+                    keypoints_folder = args.openpose_keypoints
+                
+                    keypoints_args = ''
+                    if keypoints_folder:
+                        keypoints_args = f" --write_json {keypoints_folder} "
+                
+                    blending_args = ''
+                    if not args.openpose_blending:
+                        blending_args = ' --disable_blending '
+
+                    stickfigs_path = osp.join(temp_dir, f'stickfigsvideo.{vidcodec}')
+                    cmd = f"singularity run -B {binding_path} --nv {container_path} --video {videoonly_path} --face --hand -write_video {stickfigs_path} --display 0 --model_folder {model_folder} {keypoints_args} {blending_args}"
+                    print('openpose command', cmd)
+                    error = os.system(cmd)
+                    if error:
+                        raise Exception(f'unable to generate stick figure video using singularity container. error code: {error}')
+                    outvideo_path = stickfigs_path
+
+                else:
+                
+                    raise Exception(f"unknown visual_anonymization/va: {args.visual_anonymization}")
+
+            if 'audio' in mediatype and 'audio' in anonymize:
+                # save the intermediate audio files as .wav
+                tmpaudiopath1 = osp.join(temp_dir, f'aud1.{audcodec}')  
+            
+                # transform the audio
+                audio_py_path = osp.join(osp.dirname(__file__), 'audio.py')
+                assert osp.exists(audio_py_path), f"file not found: {audio_py_path}"
+            
+                audio_transforms_args = f' --tr pitch distortion echo --pitch_n_semitones {args.pitch} --distortion_gain_db {args.distortion} --echo_gain_in {args.echo} '
+            
+                audio_cmd = f"python3 {audio_py_path} --inpath {audioonly_path} --outpath {tmpaudiopath1} {audio_transforms_args}"
+                print('Anonymizing audio...')
+                error = os.system(audio_cmd)
+                if error:
+                    raise Exception(f"unable to change audio. Check audio.py. error code: {error}")  
+                outaudio_path = tmpaudiopath1
+        
+            if mediatype == 'audio':
+                print('Creating final audio file')
+                cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y -i {outaudio_path} {outpath}'
+                error = subprocess.call(cmd, shell=True)
+                if error:
+                    raise Exception('Error in converting intermediate audio to final output audio')
+            
+            elif mediatype == 'video':
+                print('Creating final video file')
+                cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y -i {outvideo_path} -vcodec libx264 {outpath}'
+                error = subprocess.call(cmd, shell=True)
+                if error:
+                    raise Exception('Error in converting intermediate video to final output video')
+            
+            elif mediatype == 'audiovideo':
+                print('Combining audio and video to form a single output file')
+                cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y {video_start_arg} -i {outvideo_path} {audio_start_arg} -i {outaudio_path} -vcodec libx264 -acodec aac -map 0:v:0 -map 1:a:0 {outpath}'
+                error = subprocess.call(cmd, shell=True)
+                if error:
+                    raise Exception('Error in combining intermediate audio and video files to form a final output video')
+            else:
+                raise Exception(f'unknown mediatype: {mediatype}')
+        finally:
+            # remove the temporary files
+            print('removing temporary files/folders')
+            print('TEMPDIR: ' + temp_dir)
+            print('video saved at:', outpath)
+
+
 if __name__ == '__main__':
-    
     args = parse_args()
-    if args.pdb: 
+    if args.pdb:
         import pdb
         pdb.set_trace()
-        
-    assert osp.exists(args.inpath), 'path not found: ' + args.inpath
-    try:
-        # create a temporary file system to store the intermediate outputs
-        temp_dir = osp.abspath('anon_tmp_{}_{}'.format(osp.basename(args.inpath), osp.basename(args.facepath)))
-        os.makedirs(temp_dir, exist_ok=True)
-        inpath = osp.abspath(args.inpath)
-        outpath = osp.abspath(args.outpath)
-        
-        metadata = ffmpeg.probe(inpath)    
-        
-        mediatype = get_mediatype(metadata)
-        anonymize = args.anonymize
-        if anonymize not in mediatype:
-            raise Exception(f'Cannot anonymize {anonymize} when input file is {mediatype}')
-        
-        audio_start_arg, video_start_arg = get_offset_args(metadata)
-
-        audcodec = 'wav'
-        vidcodec = 'mp4'
-        if args.visual_anonymization == 'stickfigs':
-            vidcodec = 'avi'
-
-        videoonly_path = osp.join(temp_dir, f'videoonly.{vidcodec}')
-        audioonly_path = osp.join(temp_dir, f'audioonly.{audcodec}')
-        
-        outvideo_path = ""
-        outaudio_path = ""
-        
-        # separate out video
-        if 'video' in mediatype:
-            print('Separating video from input')
-            # BEWARE! I put -c copy here, but that will work best if the file is already something like h.264; in the long run we need to probe and then decide what to do (see issues on GitHub).
-            video_cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y -i {inpath} -c copy -an {videoonly_path}' 
-            error = subprocess.call(video_cmd, shell=True)
-            if error:
-                raise Exception('Error in separating video out of input file')
-            outvideo_path = videoonly_path
-        # separate out audio
-        if 'audio' in mediatype:
-            print('Separating audio from input')
-            audio_cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y -i {inpath} -vn {audioonly_path}'
-            error = subprocess.call(audio_cmd, shell=True)
-            if error:
-                raise Exception('Error in separating audio out of input file')
-            outaudio_path = audioonly_path
-            
-        if 'video' in mediatype and 'video' in anonymize:
-            
-            if args.visual_anonymization == 'swapper':
-                assert args.facepath is not None, '--facepath option cannot be None for visual_anonymization/va=swapper'
-                swappy_path = osp.join(osp.dirname(__file__), 'fsgan', 'inference', 'swap.py')
-                assert osp.exists(swappy_path), f'path not found: {swappy_path}'
-                facepath = osp.abspath(args.facepath)
-                assert osp.exists(facepath), f'facepath does not exist {facepath}'
-                print("Swapping faces, with the face:", facepath)
-                print('Input video:', inpath)
-                device_flag = ""
-                if args.cpu_only:
-                    device_flag = " --cpu_only "
-                # swap faces
-                fsgan_outpath = osp.join(temp_dir, 'fsgan_out.mp4')
-                fsgan_cmd = f'python3 {swappy_path} {facepath} -t {videoonly_path} -o {fsgan_outpath} --seg_remove_mouth --encoder_codec mp4v {device_flag}'
-                error = os.system(fsgan_cmd)
-                if error:
-                    raise Exception(f'unable to swap faces. Check fsgan. error code: {error}')
-                
-                outvideo_path = fsgan_outpath
-            
-            elif args.visual_anonymization == 'hider':
-                # use face hider if --facepath is not provided
-                print("Hiding the face, as the facepath argument was empty")
-                mtcnn_outpath = osp.join(temp_dir, "hidden_face.mp4")
-                hide_face_py_path = osp.join(osp.dirname(__file__), 'hide_face_robust.py')
-                assert osp.exists(hide_face_py_path), f"file not found: {hide_face_py_path}"
-                mtcnn_cmd = f"python3 {hide_face_py_path} --inpath {videoonly_path} --outpath {mtcnn_outpath} --shape {args.hider_shape}"
-                error = os.system(mtcnn_cmd)
-                if error:
-                    raise Exception(f"unable to run face hider. Check hide_face_robust.py. error code: {error}")
-                
-                outvideo_path = mtcnn_outpath
-                
-            elif args.visual_anonymization == 'stickfigs':
-                
-                # the core command to container has to be like: 
-                # singularity run -B /mnt/rds/redhen/gallina/home/yck5/ --nv stickfigs.sif 
-                # --video /mnt/rds/redhen/gallina/home/yck5/TestVideos/q.mp4 --face --hand 
-                # -write_video /mnt/rds/redhen/gallina/home/yck5/results/out.avi 
-                # --display 0 --model_folder /opt/openpose_models/
-                
-                # first let's check container
-                binding_path = args.openpose_bind
-                container_path = args.openpose_container
-                model_folder = args.openpose_modelfolder
-                keypoints_folder = args.openpose_keypoints
-                
-                keypoints_args = ''
-                if keypoints_folder:
-                    keypoints_args = f" --write_json {keypoints_folder} "
-                
-                blending_args = ''
-                if not args.openpose_blending:
-                    blending_args = ' --disable_blending '
-
-                stickfigs_path = osp.join(temp_dir, f'stickfigsvideo.{vidcodec}')
-                cmd = f"singularity run -B {binding_path} --nv {container_path} --video {videoonly_path} --face --hand -write_video {stickfigs_path} --display 0 --model_folder {model_folder} {keypoints_args} {blending_args}"
-                print('openpose command', cmd)
-                error = os.system(cmd)
-                if error:
-                    raise Exception(f'unable to generate stick figure video using singularity container. error code: {error}')
-                outvideo_path = stickfigs_path
-
-            else:
-                
-                raise Exception(f"unknown visual_anonymization/va: {args.visual_anonymization}")
-
-        if 'audio' in mediatype and 'audio' in anonymize:
-            # save the intermediate audio files as .wav
-            tmpaudiopath1 = osp.join(temp_dir, f'aud1.{audcodec}')  
-            
-            # transform the audio
-            audio_py_path = osp.join(osp.dirname(__file__), 'audio.py')
-            assert osp.exists(audio_py_path), f"file not found: {audio_py_path}"
-            
-            audio_transforms_args = f' --tr pitch distortion echo --pitch_n_semitones {args.pitch} --distortion_gain_db {args.distortion} --echo_gain_in {args.echo} '
-            
-            audio_cmd = f"python3 {audio_py_path} --inpath {audioonly_path} --outpath {tmpaudiopath1} {audio_transforms_args}"
-            print('Anonymizing audio...')
-            error = os.system(audio_cmd)
-            if error:
-                raise Exception(f"unable to change audio. Check audio.py. error code: {error}")  
-            outaudio_path = tmpaudiopath1
-        
-        if mediatype == 'audio':
-            print('Creating final audio file')
-            cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y -i {outaudio_path} {outpath}'
-            error = subprocess.call(cmd, shell=True)
-            if error:
-                raise Exception('Error in converting intermediate audio to final output audio')
-            
-        elif mediatype == 'video':
-            print('Creating final video file')
-            cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y -i {outvideo_path} -vcodec libx264 {outpath}'
-            error = subprocess.call(cmd, shell=True)
-            if error:
-                raise Exception('Error in converting intermediate video to final output video')
-            
-        elif mediatype == 'audiovideo':
-            print('Combining audio and video to form a single output file')
-            cmd = f'~/ffmpeg-4.1.3-amd64-static/ffmpeg -y {video_start_arg} -i {outvideo_path} {audio_start_arg} -i {outaudio_path} -vcodec libx264 -acodec aac -map 0:v:0 -map 1:a:0 {outpath}'
-            error = subprocess.call(cmd, shell=True)
-            if error:
-                raise Exception('Error in combining intermediate audio and video files to form a final output video')
-        else:
-            raise Exception(f'unknown mediatype: {mediatype}')
-    finally:
-            
-        # remove the temporary files
-        print('removing temporary files/folders')
-#        shutil.rmtree(temp_dir)
-        print("TEMPDIR: " + temp_dir)
-        print('video saved at:', outpath)
+    main(args)
